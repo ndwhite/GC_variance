@@ -23,7 +23,51 @@ until (eof FILE) {
 	$line = <FILE>;
 	chomp $line;
 
-#Calculate average GC for every taxon
+#Calculate GC content over alignment
+	if ($line =~ m/>/){
+	} else {
+	$sequence = $line;
+
+	#replace '-' in $sequence
+	$sequence=~ s/\-//g;
+	#replace g with G
+	$sequence=~ s/g/G/g;
+	#replace c with C
+	$sequence=~ s/c/C/g;
+	#count 'G' in $sequence	-> $G
+	$G = grep {$_ eq 'G'} split //, $sequence;
+	#count 'C' in $sequence	-> $C
+	$C = grep {$_ eq 'C'} split //, $sequence;
+	#sum $G and $C  -> $GC
+	$GC = $G + $C;
+
+	#explode and add number of nucleotides in $sequence to $All_Nuc
+	$nucleotides = length $sequence;
+	$All_Nuc = $All_Nuc + $nucleotides;
+	$nucleotides = 0;
+
+	#Add Gs and Cs to overall GC summation for locus
+	$NumG = $NumG + $G;
+	$NumC = $NumC + $C;
+	}		
+}
+
+#Calculate overall GC content of locus
+	$Avg_GC = ($NumG + $NumC)/$All_Nuc;
+	$Average_GC = $Avg_GC * 100;
+	
+#close file
+close (FILE);
+$line = ();
+
+##########################################################################################
+#Re-open file
+open (FILE, $ARGV[0]) || die "where is the file?\n";
+until (eof FILE) {
+	$line = <FILE>;
+	chomp $line;
+
+	#Calculate average GC for every taxon
 	#Read in $header
 	if ($line =~ m/>/){
 	$Num_taxa++;
@@ -44,31 +88,28 @@ until (eof FILE) {
 	$C = grep {$_ eq 'C'} split //, $sequence;
 	#sum $G and $C  -> $GC
 	$GC = $G + $C;
+	#get length of sequence
+	$length = length $sequence;
 
-	#explode and add number of nucleotides in $sequence to $All_Nuc
-	$nucleotides = length $sequence;
-	$All_Nuc = $All_Nuc + $nucleotides;
-	
-	#Add Gs and Cs to overall GC summation for locus
-	$NumG = $NumG + $G;
-	$NumC = $NumC + $C;
-	
+	#calculate average for locus
+	$avg = $GC / $length;
+	$average = $avg * 100;
+
+	#Calculate difference for taxon versus locus average
+	$difference = $Average_GC - $average;
+
 	#Square $GC -> $Squar_GC
-	$Squar_GC = $GC ** 2;
+	$Squar_GC = $difference ** 2;
 
 	#Add $Squar_GC to $All_squares_here	
 	$All_squares_here = $All_squares_here + $Squar_GC;
 	}
 }		
 
-#Calculate overall GC content of locus
-	#$Average_GC = ($NumG + $NumC)/$length
-	$Average_GC = ($NumG + $NumC)/$All_Nuc;
-
 #Calculate Variance
 	$Variance = $All_squares_here/$Num_taxa;
 
-#print "Locus\tAverage GC\tVariance\n$ARGV[0]\t$Average_GC\t$Variance\n";
+print "Locus\tAverage GC\tVariance\n";
 print "$ARGV[0]\t$Average_GC\t$Variance\n";
 
 end;
