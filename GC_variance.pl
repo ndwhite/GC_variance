@@ -54,7 +54,7 @@ until (eof FILE) {
 
 #Calculate overall GC content of locus
 	$Avg_GC = ($NumG + $NumC)/$All_Nuc;
-	$Average_GC = $Avg_GC * 100;
+	$Average_GC = $Avg_GC;
 	
 #close file
 close (FILE);
@@ -93,7 +93,7 @@ until (eof FILE) {
 
 	#calculate average for locus
 	$avg = $GC / $length;
-	$average = $avg * 100;
+	$average = $avg;
 
 	#Calculate difference for taxon versus locus average
 	$difference = $Average_GC - $average;
